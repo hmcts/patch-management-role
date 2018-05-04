@@ -1,0 +1,24 @@
+---
+reboot: false
+
+###
+# update can either be:
+#   false
+#     Does nothing. Useful when used with check
+#   everything
+#     Self explanatory, essentially runs 'yum -y update'
+#   security
+#     DEFAULT
+#     Only updates packages with security errata, as defined by yum-security.
+#   cve
+#     Given a list of CVEs via the 'cve' variable, will install any updates that meet these errata.
+#     Your mileage may vary, don't see this used too much on CentOS.
+###
+update: false
+
+check: true
+
+cve:
+  # example layout
+  - CVE-2017-7466
+  - CVE-2014-0160

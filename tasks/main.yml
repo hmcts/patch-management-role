@@ -1,0 +1,65 @@
+---
+- name: Check available updates
+  shell: yum check-update
+  # A successful check exits with 100, so have to ignore
+  ignore_errors: true
+  register: yumcheck
+  when: check == true
+
+- debug:
+    msg: "Up to date"
+  when: (check == true) and (yumcheck.rc == 0)
+
+- debug:
+    msg: "Updates available"
+  when: (check ==  true) and (yumcheck.rc == 100)
+
+- name: Upgrade everything
+  yum:
+    name: "*"
+    state: latest
+  register: updated
+  when: update == "everything"
+  tags:
+    - skip_ansible_lint
+
+- name: Upgrade security only
+  shell: yum -y update-minimal --security
+  register: updated
+  when: update == "security"
+
+- name: Upgrade specific CVE
+  shell: yum -y update --cve {{ item }}
+  register: updated
+  with_items: "{{ cve }}"
+  when: update == "cve" and cve is defined
+
+- name: Ensure Reform iptables are applied
+  template:
+    src: iptables.j2
+    dest: /etc/sysconfig/iptables
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Make sure iptables service is running
+  systemd: state=started name=iptables
+
+- name: Run DNS script
+  script: setdns.sh
+
+- name: Changing perm of "/etc/rc.d/rc.local", adding "+x"
+  file: dest=//etc/rc.d/rc.local mode=a+x
+
+- debug:
+    var: updated
+  when: updated.changed == true
+  tags:
+    - skip_ansible_lint
+
+- name: Reboot
+  command: /sbin/shutdown -r +1
+  async: 0
+  poll: 0
+  ignore_errors: true
+  when: reboot == true

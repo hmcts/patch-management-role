@@ -1,0 +1,15 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+docker:
+  containers:
+    - name: patch-management-role
+      image: centos
+      image_version: 7.2.1511
+      dockerfile: tests/Dockerfile
+      ansible_groups:
+        - group1
+verifier:
+  name: testinfra

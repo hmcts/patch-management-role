@@ -1,0 +1,6 @@
+---
+reboot: false
+check: false
+update: security
+cve: []
+# defaults file for patch-management-role
